@@ -1,0 +1,46 @@
+#include "WebServer.h"
+
+
+WebServer::WebServer() {}
+
+WebServer::~WebServer() {}
+
+void WebServer::init(int port, std::string user, std::string passwd, std::string databaseName,
+		bool logWrite, bool isLinger, bool isLevelTriger, int sqlNum,
+		int threadNum, bool closeLog, int actionModel) {
+	port_ = port;
+	user_ = user;
+	passwd_ = passwd;
+	databaseName_ = databaseName;
+	logWrite_ = logWrite;
+	isLinger_ = isLinger;
+	isLevelTriger_ = isLevelTriger;
+	sqlNum_ = sqlNum;
+	threadNum_ = threadNum;
+	closeLog_ = closeLog;
+	actionModel_ = actionModel;
+}
+
+
+void WebServer::initLog() {
+	if (!closeLog_) {
+		if (logWrite_) {
+			Log::getInstance()->init("../ServerLog", closeLog_, 2000, 800000, 800);
+		}
+		else {
+			Log::getInstance()->init("../ServerLog", closeLog_, 2000, 800000, 0);
+		}
+	}
+}
+
+void WebServer::initSqlConnPool() {
+	sqlConnPool_ = SqlConnPool::GetInstance();
+	sqlConnPool_->init("localhost", user_, passwd_, databaseName_, 3306, sqlNum_, closeLog_);
+
+	//userskasfjls
+}
+
+
+void WebServer::initThreadPool() {
+	threadPool_ = new ThreadPool<HttpContext> (actionModel_, sqlConnPool_, threadNum_);
+}
