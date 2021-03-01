@@ -13,6 +13,7 @@ void Log::asyncWriteLog() {
 	while (1) {	
 		std::string log = logQueue_->getFront();
 		MutexGuard lock(mutex_);
+		printf("%s\n", log.c_str());
 		fputs(log.c_str(), fp_);
 	}
 }
@@ -23,7 +24,7 @@ void* Log::flushLogThread(void *) {
 }
 
 bool Log::init(std::string filename,
-			  int closeLog,
+			  bool closeLog,
 			  int logBufSize,
 			  int splitLines,
 			  int maxSize) {
@@ -34,13 +35,14 @@ bool Log::init(std::string filename,
 	time_t tSec = time(nullptr);
 	struct tm t = *localtime(&tSec);
 	today_ = t.tm_mday;
-
+	
 	char logFullName[256]; 
 	auto p = filename.find('/');
 	if (p != std::string::npos) {
 		logName_ = filename.substr(p+1);
 		dirName_ = filename.substr(0, p);
 	}
+	else logName_ = filename;
 
 	snprintf(logFullName, 255, "%s%d_%02d_%02d_%s", dirName_.c_str(), t.tm_year + 1900, t.tm_mon + 1, t.tm_mday, logName_.c_str());
 	if ((fp_ = fopen(logFullName, "a")) == nullptr) {

@@ -34,7 +34,7 @@ template<typename T>
 bool ThreadPool<T>::put(T* request, int state) {
 	MutexGuard lock(mutex_);
 	if (tasks_.size() == maxRequest_) return false;
-	if (state != -1) request->state_ = state;
+	if (state != -1) request->state__ = state;
 	//tasks_.emplace_back(std::move(t));
 	tasks_.push_back(request);
 	condition_.signal();

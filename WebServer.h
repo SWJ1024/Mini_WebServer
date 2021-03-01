@@ -1,0 +1,97 @@
+#ifndef WEBSERVER_H
+#define WEBSERVER_H
+
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <cassert>
+#include <sys/epoll.h>
+#include "./base/ThreadPool.h"
+#include "./web/HttpConnect.h"
+#include "base/HeapTimer.h"
+#include "./base/Utils.h"
+#include <sys/types.h>          /* See NOTES */
+
+
+class WebServer {
+public:
+	WebServer();
+	~WebServer();
+
+	void init(int port, std::string user, std::string passwd, std::string databaseName,
+			bool logWrite, bool isLinger, int trigerMode, int sqlNum,
+			int threadNum, bool closeLog, int actionModel);
+
+
+	void initLog();
+	void initSqlConnPool();
+	void initThreadPool();
+	void initTrigerMode();
+
+	void eventListen();
+	void eventLoop();
+
+private:
+	bool dealClientdata();
+	bool dealTimer(TimerNode*, int);
+	bool dealSignal(bool&, bool&);
+	void dealRead(int);
+	void dealWrite(int);
+
+	void adjustTimer(TimerNode*);
+
+	void addClntToTimer(int, struct sockaddr_in);
+
+private:
+	const static int MAX_EVENT_NUM = 10000;
+	const static int MAX_FD = 65536;
+	const static int TIMESLOT = 5;
+
+	int pipefd_[2];
+
+	int listenfd_;
+	int epollfd_;
+	epoll_event events_[MAX_EVENT_NUM];
+
+	Utils utils_;
+
+	int port_;
+	std::string user_;
+	std::string passwd_;
+	std::string databaseName_;
+	
+	bool logWrite_;
+	bool closeLog_;
+
+	bool isLinger_;
+
+	int trigerMode_;
+	bool listenTrigerMode_;
+	bool connectTrigerMode_;
+
+	ThreadPool<HttpConnect> *threadPool_;
+	int sqlNum_;
+	int actionModel_;
+	int threadNum_;
+
+	SqlConnPool* sqlConnPool_;
+
+
+	char* rootPath_;
+
+	HttpConnect* users_;
+	ClientData* usersTimer_;
+};
+
+
+
+
+
+
+
+#endif

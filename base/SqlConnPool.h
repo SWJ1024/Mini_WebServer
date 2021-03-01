@@ -10,6 +10,9 @@
 
 class SqlConnPool {
 public:
+	SqlConnPool() {}
+	~SqlConnPool() {DestroyPool();}
+	
 	MYSQL* GetConnection();
 	bool ReleaseConnection(MYSQL* sqlConn);
 	int GetFreeConn() const;
@@ -19,8 +22,6 @@ public:
 
 	void init(std::string url, std::string User, std::string PassWord, std::string DataBaseName, int Port, int MaxConn, int closeLog); 
 private:
-	SqlConnPool();
-	~SqlConnPool() {DestroyPool();}
 
 	std::string url_;
 	std::string user_;

@@ -5,7 +5,6 @@
 #include <time.h>
 #include <iostream>
 #include <netinet/in.h>
-
 class TimerNode;
 
 struct ClientData {
@@ -19,10 +18,13 @@ class TimerNode {
 public:
 	TimerNode(int t) : expire_(t) {};
 	time_t expire_;
+	ClientData* data_;
 
-	void func() {
-		std::cout << expire_ << "\n";
-	}
+	//void func() {
+	//	std::cout << expire_ << "\n";
+	//}
+
+	void (*func_) (ClientData*);
 
 	bool operator < (const TimerNode &rhs) const {
 		return expire_ < rhs.expire_;

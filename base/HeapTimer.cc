@@ -64,12 +64,15 @@ void HeapTimer::delTimer(TimerNode* timer) {
 void HeapTimer::tick() {
 	time_t now = time(nullptr);
 	while (heap_.size() > 1) {
-		//if (heap_[1]->expire_ < now) break;
+		if (heap_[1]->expire_ < now) break;
 
-		heap_[1]->func();		
+		heap_[1]->func_(heap_[1]->data_);		
 		//如何调用回调函数？
 		std::swap(heap_[1], heap_[heap_.size()-1]);
 		heap_.pop_back();
 		heapDown(1);	
 	}
 }
+
+
+

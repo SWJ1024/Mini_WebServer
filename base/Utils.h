@@ -2,10 +2,11 @@
 #define BASE_UTILS
 
 #include "HeapTimer.h"
-#include "../web/HttpContext.h"
+#include "../web/HttpConnect.h"
 
 class Utils {
 public:
+
 	Utils() {}
 	~Utils() {}
 
@@ -13,7 +14,7 @@ public:
 	}
 
 	void init(int timeslot) {
-	    m_TIMESLOT = timeslot;
+	    TIMESLOT_ = timeslot;
 	}
 
 
@@ -42,7 +43,7 @@ public:
 		setnonblocking(fd);
 	}
 
-	void addsig(int sig, void(handler)(int), bool restart) {
+	void addsig(int sig, void (handler)(int), bool restart = true) {
 		struct sigaction sa;
 		memset(&sa, '\0', sizeof(sa));
 		sa.sa_handler = handler;
@@ -50,21 +51,28 @@ public:
 		sigfillset(&sa.sa_mask);
 		int ret = sigaction(sig, &sa, nullptr);
 		assert(ret != -1);
+		(void)ret;
 	}
 
 
-	void sigHandler(int sig) {
+	static void sigHandler(int sig) {
 		int saveErrno = errno;
 		int msg = sig;
-		send(u_pipefd[1], (char *)&msg, 1, 0);
+		send(pipefd_[1], (char *)&msg, 1, 0);
 		errno = saveErrno;
 	}
 
 	void timerHandler() {
-	    m_timer_lst.tick();
-		alarm(m_TIMESLOT);
+	   	timer_.tick();
+		alarm(TIMESLOT_);
 	}
-};
 
+public:
+
+	int TIMESLOT_;
+	static int *pipefd_;
+	static int epollfd_;
+	HeapTimer timer_;
+};
 
 #endif
